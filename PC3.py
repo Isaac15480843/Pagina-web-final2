@@ -294,75 +294,151 @@ elif opciones == 'Que tanto sabes de los chinos?':
         }
     ]
 
-    preguntas_dificil = [
-        {
-            "pregunta": "¿Quién es el líder del grupo BTS (Bangtan Sonyeondan)?",
-            "opciones": ["Jin", "Suga", "RM", "J-Hope"],
-            "respuesta": "RM"
-        },
-        {
-            "pregunta": "¿Qué significa la palabra 'Sasaeng' dentro de la cultura del K-pop?",
-            "opciones": ["Un fan que sigue obsesivamente a los ídolos", "Un baile moderno", "Un tipo de saludo", "Una canción de amor"],
-            "respuesta": "Un fan que sigue obsesivamente a los ídolos"
-        },
-        {
-            "pregunta": "¿Cuál es el nombre del fundador de HYBE Corporation?",
-            "opciones": ["Lee Soo-man", "Yang Hyun-suk", "Park Jin-young", "Bang Si-hyuk"],
-            "respuesta": "Bang Si-hyuk"
-        },
-        {
-            "pregunta": "En la industria del K-pop, ¿qué es un 'lightstick'?",
-            "opciones": ["Un bastón de luz oficial del grupo", "Un micrófono especial", "Un accesorio de baile", "Un tipo de coreografía"],
-            "respuesta": "Un bastón de luz oficial del grupo"
-        },
-        {
-            "pregunta": "¿Qué grupo de K-pop es conocido por tener una integrante llamada 'Lisa'?",
-            "opciones": ["TWICE", "RED VELVET", "BLACKPINK", "ITZY"],
-            "respuesta": "BLACKPINK"
-        }
-    ]
+    if dificultad == "Difícil":
+        # Intentar cargar el Excel
+        try:
+            df = pd.read_excel("BASE DE DATOS.xlsx", engine="openpyxl")
+            # Verificar que tenga las columnas necesarias
+            columnas_requeridas = ["Nombre artístico", "Lugar de nacimiento", "Signo", "Grupo de Kpop", "Rol en el grupo", "Imagen del idol"]
+            for col in columnas_requeridas:
+                if col not in df.columns:
+                    st.error(f"❌ El archivo Excel no contiene la columna '{col}'. Verifica los nombres.")
+                    st.stop()
+            
+            # Elegir un artista aleatorio
+            artista = df.sample(n=1).iloc[0]  # primera fila del sample
+            nombre_correcto = artista["Nombre artístico"]
+            lugar_correcto = artista["Lugar de nacimiento"]
+            signo_correcto = artista["Signo"]
+            grupo_correcto = artista["Grupo de Kpop"]
+            imagen = artista["Imagen del idol"]  # puede ser URL o ruta local
 
-    # --- SELECCIONAR EL BANCO SEGÚN DIFICULTAD ---
-    if dificultad == "Fácil":
-        preguntas = preguntas_facil
-    elif dificultad == "Normal":
-        preguntas = preguntas_normal
+            # Mostrar la imagen (si existe)
+            if pd.notna(imagen) and imagen != "":
+                try:
+                    st.image(imagen, caption=f"¿Reconoces a este idol?", width=200)
+                except:
+                    st.warning("No se pudo cargar la imagen. Puede que la ruta sea inválida.")
+            else:
+                st.info("📸 No hay imagen disponible para este artista.")
+
+            # --- Preparar opciones incorrectas para cada atributo ---
+            # Extraemos todos los valores únicos de cada columna (excluyendo el correcto)
+            todos_nombres = df["Nombre artístico"].dropna().unique()
+            todos_lugares = df["Lugar de nacimiento"].dropna().unique()
+            todos_signos = df["Signo"].dropna().unique()
+            todos_grupos = df["Grupo de Kpop"].dropna().unique()
+
+            # Función para obtener 3 opciones incorrectas (si hay suficientes)
+            def obtener_opciones(correcto, lista_completa):
+                # Filtrar el correcto
+                opciones = [op for op in lista_completa if op != correcto]
+                # Si hay menos de 3, repetimos algunas (pero mejor usar random con reemplazo si es necesario)
+                if len(opciones) < 3:
+                    # Rellenar con valores aleatorios de la lista (puede repetir)
+                    while len(opciones) < 3:
+                        opciones.append(np.random.choice(lista_completa))
+                # Seleccionar 3 aleatorios
+                incorrectas = np.random.choice(opciones, size=3, replace=False).tolist()
+                # Mezclar con la correcta
+                todas = incorrectas + [correcto]
+                np.random.shuffle(todas)
+                return todas
+
+            # Generar opciones para cada pregunta
+            opciones_grupo = obtener_opciones(grupo_correcto, todos_grupos)
+            opciones_nombre = obtener_opciones(nombre_correcto, todos_nombres)
+            opciones_lugar = obtener_opciones(lugar_correcto, todos_lugares)
+            opciones_signo = obtener_opciones(signo_correcto, todos_signos)
+
+            # --- Mostrar las 4 preguntas ---
+            respuestas_usuario = {}
+            respuestas_usuario[0] = st.radio(
+                f"**1. ¿A qué grupo de K-pop pertenece este idol?**",
+                opciones_grupo,
+                key="dif_grupo"
+            )
+            respuestas_usuario[1] = st.radio(
+                f"**2. ¿Cuál es el nombre artístico de este idol?**",
+                opciones_nombre,
+                key="dif_nombre"
+            )
+            respuestas_usuario[2] = st.radio(
+                f"**3. ¿Dónde nació?**",
+                opciones_lugar,
+                key="dif_lugar"
+            )
+            respuestas_usuario[3] = st.radio(
+                f"**4. ¿Cuál es su signo zodiacal?**",
+                opciones_signo,
+                key="dif_signo"
+            )
+
+            # --- Botón para calificar ---
+            if st.button("📊 Ver mi puntuación", use_container_width=True):
+                correctas = 0
+                # Comparar respuestas
+                if respuestas_usuario[0] == grupo_correcto:
+                    correctas += 1
+                if respuestas_usuario[1] == nombre_correcto:
+                    correctas += 1
+                if respuestas_usuario[2] == lugar_correcto:
+                    correctas += 1
+                if respuestas_usuario[3] == signo_correcto:
+                    correctas += 1
+
+                total = 4
+                porcentaje = (correctas / total) * 100
+
+                if porcentaje == 100:
+                    mensaje = "🌟 ¡Perfecto! Conoces a tu idol a la perfección."
+                elif porcentaje >= 50:
+                    mensaje = "🎉 ¡Bien! Tienes buen ojo, pero aún puedes profundizar."
+                else:
+                    mensaje = "📖 ¡Sigue practicando! Cada idol tiene su historia."
+
+                st.success(f"**{correctas}** de **{total}** respuestas correctas ({porcentaje:.0f}%)")
+                st.info(mensaje)
+
+                # Mostrar las respuestas correctas (opcional)
+                with st.expander("Ver respuestas correctas"):
+                    st.write(f"**Grupo:** {grupo_correcto}")
+                    st.write(f"**Nombre artístico:** {nombre_correcto}")
+                    st.write(f"**Lugar de nacimiento:** {lugar_correcto}")
+                    st.write(f"**Signo:** {signo_correcto}")
+
+        except FileNotFoundError:
+            st.error("❌ No se encontró el archivo 'BASE DE DATOS.xlsx'. Asegúrate de que esté en la misma carpeta.")
+        except Exception as e:
+            st.error(f"❌ Error al leer el archivo Excel: {e}")
+
+    # --- Si la dificultad es Fácil o Normal, usar las preguntas fijas ---
     else:
-        preguntas = preguntas_dificil
+        if dificultad == "Fácil":
+            preguntas = preguntas_facil
+        else:  # Normal
+            preguntas = preguntas_normal
 
-    # --- MOSTRAR PREGUNTAS Y GUARDAR RESPUESTAS ---
-    respuestas_usuario = {}
-    for i, p in enumerate(preguntas):
-        respuestas_usuario[i] = st.radio(
-            f"**{i+1}. {p['pregunta']}**",
-            p["opciones"],
-            key=f"pregunta_{i}"  # Clave única para cada radio
-        )
-
-    # --- BOTÓN PARA CALIFICAR ---
-    if st.button("📊 Ver mi puntuación", use_container_width=True):
-        correctas = 0
+        respuestas_usuario = {}
         for i, p in enumerate(preguntas):
-            if respuestas_usuario[i] == p["respuesta"]:
-                correctas += 1
-        
-        total = len(preguntas)
-        porcentaje = (correctas / total) * 100
-        
-        # Mostrar resultado con emojis según rendimiento
-        if porcentaje == 100:
-            mensaje = "🌟 ¡Perfecto! Eres un auténtico experto en K-pop."
-        elif porcentaje >= 60:
-            mensaje = "🎉 ¡Bien! Tienes buen conocimiento, pero puedes mejorar."
-        else:
-            mensaje = "📖 ¡Sigue practicando! El K-pop tiene mucho más que ofrecer."
-        
-        st.success(f"**{correctas}** de **{total}** respuestas correctas ({porcentaje:.0f}%)")
-        st.info(mensaje)
-        
-        # Opcional: mostrar cuáles fallaste (si quieres, descomenta esto)
-        # with st.expander("Ver respuestas correctas"):
-        #     for i, p in enumerate(preguntas):
-        #         if respuestas_usuario[i] != p["respuesta"]:
-        #             st.write(f"❌ {p['pregunta']} → Respuesta correcta: **{p['respuesta']}**")
+            respuestas_usuario[i] = st.radio(
+                f"**{i+1}. {p['pregunta']}**",
+                p["opciones"],
+                key=f"pregunta_{i}"
+            )
 
+        if st.button("📊 Ver mi puntuación", use_container_width=True):
+            correctas = 0
+            for i, p in enumerate(preguntas):
+                if respuestas_usuario[i] == p["respuesta"]:
+                    correctas += 1
+            total = len(preguntas)
+            porcentaje = (correctas / total) * 100
+            if porcentaje == 100:
+                mensaje = "🌟 ¡Perfecto! Eres un auténtico experto en K-pop."
+            elif porcentaje >= 60:
+                mensaje = "🎉 ¡Bien! Tienes buen conocimiento, pero puedes mejorar."
+            else:
+                mensaje = "📖 ¡Sigue practicando! El K-pop tiene mucho más que ofrecer."
+            st.success(f"**{correctas}** de **{total}** respuestas correctas ({porcentaje:.0f}%)")
+            st.info(mensaje)
