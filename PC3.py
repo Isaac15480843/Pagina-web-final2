@@ -38,6 +38,8 @@ from streamlit_option_menu import option_menu
 # components.html() permite mostrar código HTML interactivo directamente en la interfaz.
 import streamlit.components.v1 as components
 import base64
+import pandas as pd
+import random
 #Imagen pa
 #pip install pandas openpyxl
 # Menú vertical en una barra lateral
