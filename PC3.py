@@ -221,15 +221,148 @@ elif opciones == 'Gráficos':
             height=600
         )
 elif opciones == 'Que tanto sabes de los chinos?':
-    st.markdown("<h1 style='text-align: center;'>Que tanto sabes de los chinos? 💻</h1>",unsafe_allow_html=True)
-
-
-
-    
+    st.markdown("<h1 style='text-align: center;'>Que tanto sabes de los chinos? 💻</h1>",unsafe_allow_html=True)    
     # Agregar un  texto para la respuesta
     texto_4 = """
     Hola preciosa calabazita de algodon, en este quiz se te hara una prueba psicometrica 
     para saber que tan fan eres de los hermosos chicos ojos razgados que cantan como los mismos angeles
     """
     st.markdown(f"<div style='text-align: justify; font-size: 18px;'>{texto_4}</div>", unsafe_allow_html=True)
+        # --- SELECCIONAR DIFICULTAD ---
+    dificultad = st.radio(
+        "Selecciona el nivel de dificultad:",
+        options=["Fácil", "Normal", "Difícil"],
+        index=0,  # Por defecto "Fácil"
+        horizontal=True
+    )
+    st.divider()  # Línea separadora
+
+    # --- BANCO DE PREGUNTAS ---
+    preguntas_facil = [
+        {
+            "pregunta": "¿De qué país proviene el K-pop?",
+            "opciones": ["Japón", "Corea del Sur", "China", "Tailandia"],
+            "respuesta": "Corea del Sur"
+        },
+        {
+            "pregunta": "¿Qué significa K-pop?",
+            "opciones": ["Korean Pop", "King Pop", "Kawaii Pop", "K-Music"],
+            "respuesta": "Korean Pop"
+        },
+        {
+            "pregunta": "¿Cuál de estos es un grupo de K-pop?",
+            "opciones": ["BTS", "One Direction", "Maroon 5", "Coldplay"],
+            "respuesta": "BTS"
+        },
+        {
+            "pregunta": "¿Cuál de estas palabras se usa mucho en K-pop para referirse a los fans?",
+            "opciones": ["Fandom", "Clan", "Equipo", "Banda"],
+            "respuesta": "Fandom"
+        },
+        {
+            "pregunta": "¿Qué significa 'maknae'?",
+            "opciones": ["Líder", "Integrante más joven", "Rapero principal", "Coreógrafo"],
+            "respuesta": "Integrante más joven"
+        }
+    ]
+
+    preguntas_normal = [
+        {
+            "pregunta": "¿Cuál es la compañía detrás del grupo BTS?",
+            "opciones": ["SM Entertainment", "YG Entertainment", "HYBE (antes Big Hit)", "JYP Entertainment"],
+            "respuesta": "HYBE (antes Big Hit)"
+        },
+        {
+            "pregunta": "En el K-pop, ¿qué es un 'comeback'?",
+            "opciones": ["Un concierto especial", "El lanzamiento de nuevo material musical", "Un baile característico", "El saludo del grupo"],
+            "respuesta": "El lanzamiento de nuevo material musical"
+        },
+        {
+            "pregunta": "¿Qué significa 'bias' en el fandom del K-pop?",
+            "opciones": ["El miembro favorito de cada persona", "El líder del grupo", "El baile principal", "El primer álbum"],
+            "respuesta": "El miembro favorito de cada persona"
+        },
+        {
+            "pregunta": "¿Qué artista popularizó el K-pop a nivel mundial con 'Gangnam Style'?",
+            "opciones": ["BTS", "PSY", "BLACKPINK", "EXO"],
+            "respuesta": "PSY"
+        },
+        {
+            "pregunta": "¿Cómo se llama el sistema de baile sincronizado en grupo que caracteriza al K-pop?",
+            "opciones": ["Freestyle", "Coreografía en espejo", "Dance battle", "Performance grupal"],
+            "respuesta": "Coreografía en espejo"  # Aunque es un término común, lo dejo así para la prueba
+        }
+    ]
+
+    preguntas_dificil = [
+        {
+            "pregunta": "¿Quién es el líder del grupo BTS (Bangtan Sonyeondan)?",
+            "opciones": ["Jin", "Suga", "RM", "J-Hope"],
+            "respuesta": "RM"
+        },
+        {
+            "pregunta": "¿Qué significa la palabra 'Sasaeng' dentro de la cultura del K-pop?",
+            "opciones": ["Un fan que sigue obsesivamente a los ídolos", "Un baile moderno", "Un tipo de saludo", "Una canción de amor"],
+            "respuesta": "Un fan que sigue obsesivamente a los ídolos"
+        },
+        {
+            "pregunta": "¿Cuál es el nombre del fundador de HYBE Corporation?",
+            "opciones": ["Lee Soo-man", "Yang Hyun-suk", "Park Jin-young", "Bang Si-hyuk"],
+            "respuesta": "Bang Si-hyuk"
+        },
+        {
+            "pregunta": "En la industria del K-pop, ¿qué es un 'lightstick'?",
+            "opciones": ["Un bastón de luz oficial del grupo", "Un micrófono especial", "Un accesorio de baile", "Un tipo de coreografía"],
+            "respuesta": "Un bastón de luz oficial del grupo"
+        },
+        {
+            "pregunta": "¿Qué grupo de K-pop es conocido por tener una integrante llamada 'Lisa'?",
+            "opciones": ["TWICE", "RED VELVET", "BLACKPINK", "ITZY"],
+            "respuesta": "BLACKPINK"
+        }
+    ]
+
+    # --- SELECCIONAR EL BANCO SEGÚN DIFICULTAD ---
+    if dificultad == "Fácil":
+        preguntas = preguntas_facil
+    elif dificultad == "Normal":
+        preguntas = preguntas_normal
+    else:
+        preguntas = preguntas_dificil
+
+    # --- MOSTRAR PREGUNTAS Y GUARDAR RESPUESTAS ---
+    respuestas_usuario = {}
+    for i, p in enumerate(preguntas):
+        respuestas_usuario[i] = st.radio(
+            f"**{i+1}. {p['pregunta']}**",
+            p["opciones"],
+            key=f"pregunta_{i}"  # Clave única para cada radio
+        )
+
+    # --- BOTÓN PARA CALIFICAR ---
+    if st.button("📊 Ver mi puntuación", use_container_width=True):
+        correctas = 0
+        for i, p in enumerate(preguntas):
+            if respuestas_usuario[i] == p["respuesta"]:
+                correctas += 1
+        
+        total = len(preguntas)
+        porcentaje = (correctas / total) * 100
+        
+        # Mostrar resultado con emojis según rendimiento
+        if porcentaje == 100:
+            mensaje = "🌟 ¡Perfecto! Eres un auténtico experto en K-pop."
+        elif porcentaje >= 60:
+            mensaje = "🎉 ¡Bien! Tienes buen conocimiento, pero puedes mejorar."
+        else:
+            mensaje = "📖 ¡Sigue practicando! El K-pop tiene mucho más que ofrecer."
+        
+        st.success(f"**{correctas}** de **{total}** respuestas correctas ({porcentaje:.0f}%)")
+        st.info(mensaje)
+        
+        # Opcional: mostrar cuáles fallaste (si quieres, descomenta esto)
+        # with st.expander("Ver respuestas correctas"):
+        #     for i, p in enumerate(preguntas):
+        #         if respuestas_usuario[i] != p["respuesta"]:
+        #             st.write(f"❌ {p['pregunta']} → Respuesta correcta: **{p['respuesta']}**")
 
