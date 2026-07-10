@@ -470,6 +470,4 @@ elif opciones == 'Que tanto sabes de los chinos?':
                 st.write(f"**Lugar de nacimiento:** {preguntas['lugar']['correcta']}")
                 st.write(f"**Signo:** {preguntas['signo']['correcta']}")
 
-    # --- Si la dificultad es Fácil o Normal, usar las preguntas fijas ---
-    else:
-        # ... (igual que antes, sin cambios)
+
