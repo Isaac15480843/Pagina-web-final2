@@ -514,7 +514,7 @@ elif opciones == 'Que tanto sabes de los chinos?':
                 mensaje = "🌟 ¡Perfecto! Eres un auténtico experto en K-pop."
                 
                 col1, col2 = st.columns(2)
-                    with open("Amongus1.png", "rb") as f:
+                    with open("yoshi.png", "rb") as f:
                     img_data = base64.b64encode(f.read()).decode()
     
                 # Poner el enlace (esto es HTML, pero escrito desde Python) Con esto podemos escribiri HTML en phyton para que el amongus te mande a un video
