@@ -37,6 +37,8 @@ from streamlit_option_menu import option_menu
 # Este módulo permite incrustar componentes personalizados escritos en HTML, CSS y JavaScript dentro de una aplicación.
 # components.html() permite mostrar código HTML interactivo directamente en la interfaz.
 import streamlit.components.v1 as components
+import base64
+#Imagen pa
 
 # Menú vertical en una barra lateral
 # Crea una barra lateral (sidebar) en la aplicación.
@@ -220,7 +222,17 @@ elif opciones == 'Gráficos':
         )
 elif opciones == 'Que tanto sabes de los chinos?':
     st.markdown("<h1 style='text-align: center;'>Que tanto sabes de los chinos? 💻</h1>",unsafe_allow_html=True)
-    col1.gif("Amongus.gif", caption='Ellie', width=300)
+    with open("Amongus.gif", "rb") as file:
+    # 2. Codificar el contenido en Base64
+    encoded = base64.b64encode(file.read()).decode('utf-8')
+
+# 3. Renderizar el GIF usando Markdown con HTML seguro
+    st.markdown(
+    f'<img src="data:Amongus/gif;base64,{encoded}" alt="GIF animado">',
+    unsafe_allow_html=True
+
+
+    
     # Agregar un  texto para la respuesta
     texto_4 = """
     Hola preciosa calabazita de algodon, en este quiz se te hara una prueba psicometrica 
