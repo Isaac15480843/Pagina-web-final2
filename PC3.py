@@ -306,7 +306,7 @@ elif opciones == 'Que tanto sabes de los chinos?':
             st.session_state.preguntas_dificil = None
             st.session_state.respuestas_usuario_dificil = {}
             st.session_state.calificado_dificil = False
-
+    
         # Función para cargar un nuevo artista y generar preguntas
         def cargar_nuevo_artista():
             try:
@@ -469,5 +469,34 @@ elif opciones == 'Que tanto sabes de los chinos?':
                 st.write(f"**Nombre artístico:** {preguntas['nombre']['correcta']}")
                 st.write(f"**Lugar de nacimiento:** {preguntas['lugar']['correcta']}")
                 st.write(f"**Signo:** {preguntas['signo']['correcta']}")
+        
+         # --- Si la dificultad es Fácil o Normal, usar las preguntas fijas ---
+    else:
+        if dificultad == "Fácil":
+            preguntas = preguntas_facil
+        else:  # Normal
+            preguntas = preguntas_normal
 
+        respuestas_usuario = {}
+        for i, p in enumerate(preguntas):
+            respuestas_usuario[i] = st.radio(
+                f"**{i+1}. {p['pregunta']}**",
+                p["opciones"],
+                key=f"pregunta_{i}"
+            )
 
+        if st.button("📊 Ver mi puntuación", use_container_width=True):
+            correctas = 0
+            for i, p in enumerate(preguntas):
+                if respuestas_usuario[i] == p["respuesta"]:
+                    correctas += 1
+            total = len(preguntas)
+            porcentaje = (correctas / total) * 100
+            if porcentaje == 100:
+                mensaje = "🌟 ¡Perfecto! Eres un auténtico experto en K-pop."
+            elif porcentaje >= 60:
+                mensaje = "🎉 ¡Bien! Tienes buen conocimiento, pero puedes mejorar."
+            else:
+                mensaje = "📖 ¡Sigue practicando! El K-pop tiene mucho más que ofrecer."
+            st.success(f"**{correctas}** de **{total}** respuestas correctas ({porcentaje:.0f}%)")
+            st.info(mensaje)
