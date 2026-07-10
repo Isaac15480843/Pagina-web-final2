@@ -219,8 +219,8 @@ elif opciones == 'Gráficos':
             height=600
         )
 elif opciones == 'Que tanto sabes de los chinos?':
-    st.markdown("<h1 style='text-align: center;'>Que tanto sabes de los chinos? 💻</h1>", unsafe_allow_html=True)
-
+    st.markdown("<h1 style='text-align: center;'>Que tanto sabes de los chinos? 💻</h1>",unsafe_allow_html=True)
+    col1.gif("Amongus.gif", caption='Ellie', width=300)
     # Agregar un  texto para la respuesta
     texto_4 = """
     Hola preciosa calabazita de algodon, en este quiz se te hara una prueba psicometrica 
