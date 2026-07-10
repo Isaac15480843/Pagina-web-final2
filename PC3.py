@@ -224,6 +224,10 @@ elif opciones == 'Gráficos':
             html_content,
             height=600
         )
+
+
+
+###Aqui es donde se hace el quiz de los chinos 
 elif opciones == 'Que tanto sabes de los chinos?':
     st.markdown("<h1 style='text-align: center;'>Que tanto sabes de los chinos? 💻</h1>",unsafe_allow_html=True)    
     # Agregar un  texto para la respuesta
@@ -231,7 +235,11 @@ elif opciones == 'Que tanto sabes de los chinos?':
     Hola preciosa calabazita de algodon, en este quiz se te hara una prueba psicometrica 
     para saber que tan fan eres de los hermosos chicos ojos razgados que cantan como los mismos angeles
     """
-    col1.image("Amongus1.png", caption='Ellie', width=300)
+    
+    col1, col2 = st.columns(2)
+     with col1:
+     st.image("Amongus1.png", caption='Amongus1', width=300)
+    
     st.markdown(f"<div style='text-align: justify; font-size: 18px;'>{texto_4}</div>", unsafe_allow_html=True)
         # --- SELECCIONAR DIFICULTAD ---
     dificultad = st.radio(
