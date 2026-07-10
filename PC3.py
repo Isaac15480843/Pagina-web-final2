@@ -219,7 +219,7 @@ elif opciones == 'Gráficos':
             height=600
         )
 elif opciones == 'Que tanto sabes de los chinos?':
-    st.markdown("<h1 style='text-align: center;'>Que tanto sabes de los chinos? 💻</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Que tanto sabes de los chinos? 💻</h1>")
 
     # Agregar un  texto para la respuesta
     texto_4 = """
