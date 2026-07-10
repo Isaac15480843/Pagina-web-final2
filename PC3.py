@@ -512,6 +512,20 @@ elif opciones == 'Que tanto sabes de los chinos?':
             porcentaje = (correctas / total) * 100
             if porcentaje == 100:
                 mensaje = "🌟 ¡Perfecto! Eres un auténtico experto en K-pop."
+                
+                col1, col2 = st.columns(2)
+                    with open("Amongus1.png", "rb") as f:
+                    img_data = base64.b64encode(f.read()).decode()
+    
+                # Poner el enlace (esto es HTML, pero escrito desde Python) Con esto podemos escribiri HTML en phyton para que el amongus te mande a un video
+                    st.markdown(
+                        f'<a href="https://www.youtube.com/watch?v=VoQ1q41iJS0" target="_blank">'
+                        f'<img src="data:image/png;base64,{img_data}" width="50">'
+                        f'<p style="text-align:center;font-size:12px;color:gray;">Causa</p>'
+                        f'</a>',
+                        unsafe_allow_html=True
+                               )
+                
             elif porcentaje >= 60:
                 mensaje = "🎉 ¡Bien! Tienes buen conocimiento, pero puedes mejorar."
             else:
