@@ -222,14 +222,7 @@ elif opciones == 'Gráficos':
         )
 elif opciones == 'Que tanto sabes de los chinos?':
     st.markdown("<h1 style='text-align: center;'>Que tanto sabes de los chinos? 💻</h1>",unsafe_allow_html=True)
-    with open("Amongus.gif", "rb") as file:
-    # 2. Codificar el contenido en Base64
-    encoded = base64.b64encode(file.read()).decode('utf-8')
 
-# 3. Renderizar el GIF usando Markdown con HTML seguro
-    st.markdown(
-    f'<img src="data:Amongus/gif;base64,{encoded}" alt="GIF animado">',
-    unsafe_allow_html=True
 
 
     
