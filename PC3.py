@@ -41,8 +41,8 @@ import streamlit.components.v1 as components
 # Menú vertical en una barra lateral
 # Crea una barra lateral (sidebar) en la aplicación.
 with st.sidebar:
-    opciones = option_menu("Selecciona una sección: ",['Inicio', 'Experiencia', 'Gráficos'] , 
-        icons=['0-circle','1-circle', '2-circle'], menu_icon="filetype-py", default_index=0)
+    opciones = option_menu("Selecciona una sección: ",['Inicio', 'Experiencia', 'Gráficos', 'Que tanto sabes de los chinos?'] , 
+        icons=['0-circle','1-circle', '2-circle','3-circle'], menu_icon="filetype-py", default_index=0)
     # Crea un menú de opciones dentro de la barra lateral -> option_menu(...)
     # Título que se mostrará encima del menú -> "Selecciona una sección: "
     # Lista de opciones disponibles para navegar -> ['Inicio', 'Experiencia', 'Gráficos']
@@ -218,3 +218,16 @@ elif opciones == 'Gráficos':
             html_content,
             height=600
         )
+
+    elif opciones == 'Que tanto sabes de los chinos?':
+    st.markdown("<h1 style='text-align: center;'>Nombre a la sección de experiencia 💻</h1>", unsafe_allow_html=True)
+
+    # Agregar un  texto para la respuesta
+    texto_2 = """
+    Aquí escribe tu experiencia aprendiendo a programar. 
+    ¿Cómo te sentiste al principio?, 
+    ¿Qué te ha enseñado la programación?, 
+    ¿Qué te gusta de programar?, 
+    ¿Qué te gustaría hacer con la programación en el futuro?
+    ¿Cómo se relaciona lo que haz aprendido con tu carrera?
+    """
