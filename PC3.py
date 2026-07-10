@@ -39,7 +39,7 @@ from streamlit_option_menu import option_menu
 import streamlit.components.v1 as components
 import base64
 #Imagen pa
-
+pip install pandas openpyxl
 # Menú vertical en una barra lateral
 # Crea una barra lateral (sidebar) en la aplicación.
 with st.sidebar:
