@@ -40,6 +40,7 @@ import streamlit.components.v1 as components
 import base64
 import pandas as pd
 import random
+import numpy as np 
 #Imagen pa
 #pip install pandas openpyxl
 # Menú vertical en una barra lateral
