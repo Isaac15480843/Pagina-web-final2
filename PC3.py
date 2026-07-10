@@ -237,8 +237,8 @@ elif opciones == 'Que tanto sabes de los chinos?':
     """
     
     col1, col2 = st.columns(2)
-     with col1:
-     st.image("Amongus1.png", caption='Amongus1', width=300)
+    with col1:
+         st.image("Amongus1.png", caption='Amongus1', width=300)
     
     st.markdown(f"<div style='text-align: justify; font-size: 18px;'>{texto_4}</div>", unsafe_allow_html=True)
         # --- SELECCIONAR DIFICULTAD ---
