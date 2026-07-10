@@ -237,8 +237,17 @@ elif opciones == 'Que tanto sabes de los chinos?':
     """
     
     col1, col2 = st.columns(2)
-    with col1:
-         st.image("Amongus1.png", caption='Causa',href="https://www.ejemplo.com" ,width=50)
+    with open("Amongus1.png", "rb") as f:
+        img_data = base64.b64encode(f.read()).decode()
+    
+    # Poner el enlace (esto es HTML, pero escrito desde Python)
+    st.markdown(
+        f'<a href="https://www.youtube.com/watch?v=VoQ1q41iJS0" target="_blank">'
+        f'<img src="data:image/png;base64,{img_data}" width="50">'
+        f'<p style="text-align:center;font-size:12px;color:gray;">Causa</p>'
+        f'</a>',
+        unsafe_allow_html=True
+    )
     
     st.markdown(f"<div style='text-align: justify; font-size: 18px;'>{texto_4}</div>", unsafe_allow_html=True)
         # --- SELECCIONAR DIFICULTAD ---
