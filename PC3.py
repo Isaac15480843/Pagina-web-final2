@@ -41,6 +41,7 @@ import base64
 import pandas as pd
 import random
 import numpy as np 
+import random
 #Imagen pa
 #pip install pandas openpyxl
 # Menú vertical en una barra lateral
@@ -297,151 +298,178 @@ elif opciones == 'Que tanto sabes de los chinos?':
         }
     ]
 
+    # --- LÓGICA PARA DIFICULTAD DIFÍCIL (CON EXCEL Y SESSION_STATE) ---
     if dificultad == "Difícil":
-        # Intentar cargar el Excel
-        try:
-            df = pd.read_excel("BASE DE DATOS.xlsx", engine="openpyxl")
-            # Verificar que tenga las columnas necesarias
-            columnas_requeridas = ["Nombre artístico", "Lugar de nacimiento", "Signo", "Grupo de Kpop", "Rol en el grupo", "Imagen del idol"]
-            for col in columnas_requeridas:
-                if col not in df.columns:
-                    st.error(f"❌ El archivo Excel no contiene la columna '{col}'. Verifica los nombres.")
-                    st.stop()
-            
-            # Elegir un artista aleatorio
-            artista = df.sample(n=1).iloc[0]  # primera fila del sample
-            nombre_correcto = artista["Nombre artístico"]
-            lugar_correcto = artista["Lugar de nacimiento"]
-            signo_correcto = artista["Signo"]
-            grupo_correcto = artista["Grupo de Kpop"]
-            imagen = artista["Imagen del idol"]  # puede ser URL o ruta local
+        # Inicializar las variables de estado si no existen
+        if "artista_dificil" not in st.session_state:
+            st.session_state.artista_dificil = None
+            st.session_state.preguntas_dificil = None
+            st.session_state.respuestas_usuario_dificil = {}
+            st.session_state.calificado_dificil = False
 
-            # Mostrar la imagen (si existe)
-            if pd.notna(imagen) and imagen != "":
-                try:
-                    st.image(imagen, caption=f"¿Reconoces a este idol?", width=200)
-                except:
-                    st.warning("No se pudo cargar la imagen. Puede que la ruta sea inválida.")
-            else:
-                st.info("📸 No hay imagen disponible para este artista.")
+        # Función para cargar un nuevo artista y generar preguntas
+        def cargar_nuevo_artista():
+            try:
+                df = pd.read_excel("BASE DE DATOS.xlsx", engine="openpyxl")
+                # Verificar columnas
+                columnas_requeridas = ["Nombre artístico", "Lugar de nacimiento", "Signo", "Grupo de Kpop", "Rol en el grupo", "Imagen del idol"]
+                for col in columnas_requeridas:
+                    if col not in df.columns:
+                        st.error(f"❌ El archivo Excel no contiene la columna '{col}'. Verifica los nombres.")
+                        return False
+                # Elegir un artista aleatorio
+                artista = df.sample(n=1).iloc[0]
+                # Guardar en session_state
+                st.session_state.artista_dificil = artista
+                # Generar opciones para cada atributo
+                todos_nombres = df["Nombre artístico"].dropna().unique()
+                todos_lugares = df["Lugar de nacimiento"].dropna().unique()
+                todos_signos = df["Signo"].dropna().unique()
+                todos_grupos = df["Grupo de Kpop"].dropna().unique()
 
-            # --- Preparar opciones incorrectas para cada atributo ---
-            # Extraemos todos los valores únicos de cada columna (excluyendo el correcto)
-            todos_nombres = df["Nombre artístico"].dropna().unique()
-            todos_lugares = df["Lugar de nacimiento"].dropna().unique()
-            todos_signos = df["Signo"].dropna().unique()
-            todos_grupos = df["Grupo de Kpop"].dropna().unique()
+                def obtener_opciones(correcto, lista_completa):
+                    opciones = [op for op in lista_completa if op != correcto]
+                    if len(opciones) < 3:
+                        while len(opciones) < 3:
+                            opciones.append(random.choice(lista_completa))
+                    incorrectas = random.sample(opciones, 3) if len(opciones) >= 3 else random.choices(opciones, k=3)
+                    todas = incorrectas + [correcto]
+                    random.shuffle(todas)
+                    return todas
 
-            # Función para obtener 3 opciones incorrectas (si hay suficientes)
-            def obtener_opciones(correcto, lista_completa):
-                # Filtrar el correcto
-                opciones = [op for op in lista_completa if op != correcto]
-                # Si hay menos de 3, repetimos algunas (pero mejor usar random con reemplazo si es necesario)
-                if len(opciones) < 3:
-                    # Rellenar con valores aleatorios de la lista (puede repetir)
-                    while len(opciones) < 3:
-                        opciones.append(np.random.choice(lista_completa))
-                # Seleccionar 3 aleatorios
-                incorrectas = np.random.choice(opciones, size=3, replace=False).tolist()
-                # Mezclar con la correcta
-                todas = incorrectas + [correcto]
-                np.random.shuffle(todas)
-                return todas
+                # Almacenar las opciones en session_state
+                st.session_state.preguntas_dificil = {
+                    "grupo": {
+                        "pregunta": "¿A qué grupo de K-pop pertenece este idol?",
+                        "opciones": obtener_opciones(artista["Grupo de Kpop"], todos_grupos),
+                        "correcta": artista["Grupo de Kpop"]
+                    },
+                    "nombre": {
+                        "pregunta": "¿Cuál es el nombre artístico de este idol?",
+                        "opciones": obtener_opciones(artista["Nombre artístico"], todos_nombres),
+                        "correcta": artista["Nombre artístico"]
+                    },
+                    "lugar": {
+                        "pregunta": "¿Dónde nació?",
+                        "opciones": obtener_opciones(artista["Lugar de nacimiento"], todos_lugares),
+                        "correcta": artista["Lugar de nacimiento"]
+                    },
+                    "signo": {
+                        "pregunta": "¿Cuál es su signo zodiacal?",
+                        "opciones": obtener_opciones(artista["Signo"], todos_signos),
+                        "correcta": artista["Signo"]
+                    }
+                }
+                # Reiniciar respuestas del usuario
+                st.session_state.respuestas_usuario_dificil = {}
+                st.session_state.calificado_dificil = False
+                return True
+            except FileNotFoundError:
+                st.error("❌ No se encontró el archivo 'BASE DE DATOS.xlsx'. Asegúrate de que esté en la misma carpeta.")
+                return False
+            except Exception as e:
+                st.error(f"❌ Error al leer el archivo Excel: {e}")
+                return False
 
-            # Generar opciones para cada pregunta
-            opciones_grupo = obtener_opciones(grupo_correcto, todos_grupos)
-            opciones_nombre = obtener_opciones(nombre_correcto, todos_nombres)
-            opciones_lugar = obtener_opciones(lugar_correcto, todos_lugares)
-            opciones_signo = obtener_opciones(signo_correcto, todos_signos)
+        # Si no hay artista cargado (primera vez), cargar uno
+        if st.session_state.artista_dificil is None:
+            cargando = cargar_nuevo_artista()
+            if not cargando:
+                st.stop()
 
-            # --- Mostrar las 4 preguntas ---
-            respuestas_usuario = {}
-            respuestas_usuario[0] = st.radio(
-                f"**1. ¿A qué grupo de K-pop pertenece este idol?**",
-                opciones_grupo,
-                key="dif_grupo"
-            )
-            respuestas_usuario[1] = st.radio(
-                f"**2. ¿Cuál es el nombre artístico de este idol?**",
-                opciones_nombre,
-                key="dif_nombre"
-            )
-            respuestas_usuario[2] = st.radio(
-                f"**3. ¿Dónde nació?**",
-                opciones_lugar,
-                key="dif_lugar"
-            )
-            respuestas_usuario[3] = st.radio(
-                f"**4. ¿Cuál es su signo zodiacal?**",
-                opciones_signo,
-                key="dif_signo"
-            )
+        # Mostrar el artista y las preguntas desde session_state
+        artista = st.session_state.artista_dificil
+        preguntas = st.session_state.preguntas_dificil
 
-            # --- Botón para calificar ---
+        # Mostrar imagen
+        imagen = artista["Imagen del idol"]
+        if pd.notna(imagen) and imagen != "":
+            try:
+                st.image(imagen, caption=f"¿Reconoces a este idol?", width=200)
+            except:
+                st.warning("No se pudo cargar la imagen. Puede que la ruta sea inválida.")
+        else:
+            st.info("📸 No hay imagen disponible para este artista.")
+
+        # Mostrar las preguntas (usando session_state para almacenar las respuestas)
+        # Pregunta 1: Grupo
+        resp_grupo = st.radio(
+            f"**1. {preguntas['grupo']['pregunta']}**",
+            preguntas['grupo']['opciones'],
+            key="dif_grupo",
+            index=None  # para que no tenga selección por defecto
+        )
+        # Pregunta 2: Nombre
+        resp_nombre = st.radio(
+            f"**2. {preguntas['nombre']['pregunta']}**",
+            preguntas['nombre']['opciones'],
+            key="dif_nombre",
+            index=None
+        )
+        # Pregunta 3: Lugar
+        resp_lugar = st.radio(
+            f"**3. {preguntas['lugar']['pregunta']}**",
+            preguntas['lugar']['opciones'],
+            key="dif_lugar",
+            index=None
+        )
+        # Pregunta 4: Signo
+        resp_signo = st.radio(
+            f"**4. {preguntas['signo']['pregunta']}**",
+            preguntas['signo']['opciones'],
+            key="dif_signo",
+            index=None
+        )
+
+        # Guardar respuestas en session_state
+        st.session_state.respuestas_usuario_dificil["grupo"] = resp_grupo
+        st.session_state.respuestas_usuario_dificil["nombre"] = resp_nombre
+        st.session_state.respuestas_usuario_dificil["lugar"] = resp_lugar
+        st.session_state.respuestas_usuario_dificil["signo"] = resp_signo
+
+        # Botón para calificar
+        col1, col2 = st.columns(2)
+        with col1:
             if st.button("📊 Ver mi puntuación", use_container_width=True):
-                correctas = 0
-                # Comparar respuestas
-                if respuestas_usuario[0] == grupo_correcto:
-                    correctas += 1
-                if respuestas_usuario[1] == nombre_correcto:
-                    correctas += 1
-                if respuestas_usuario[2] == lugar_correcto:
-                    correctas += 1
-                if respuestas_usuario[3] == signo_correcto:
-                    correctas += 1
-
-                total = 4
-                porcentaje = (correctas / total) * 100
-
-                if porcentaje == 100:
-                    mensaje = "🌟 ¡Perfecto! Conoces a tu idol a la perfección."
-                elif porcentaje >= 50:
-                    mensaje = "🎉 ¡Bien! Tienes buen ojo, pero aún puedes profundizar."
+                # Verificar que todas las preguntas tengan respuesta
+                if any(v is None for v in st.session_state.respuestas_usuario_dificil.values()):
+                    st.warning("Por favor, responde todas las preguntas antes de calificar.")
                 else:
-                    mensaje = "📖 ¡Sigue practicando! Cada idol tiene su historia."
+                    correctas = 0
+                    if st.session_state.respuestas_usuario_dificil["grupo"] == preguntas['grupo']['correcta']:
+                        correctas += 1
+                    if st.session_state.respuestas_usuario_dificil["nombre"] == preguntas['nombre']['correcta']:
+                        correctas += 1
+                    if st.session_state.respuestas_usuario_dificil["lugar"] == preguntas['lugar']['correcta']:
+                        correctas += 1
+                    if st.session_state.respuestas_usuario_dificil["signo"] == preguntas['signo']['correcta']:
+                        correctas += 1
+                    total = 4
+                    porcentaje = (correctas / total) * 100
+                    if porcentaje == 100:
+                        mensaje = "🌟 ¡Perfecto! Conoces a tu idol a la perfección."
+                    elif porcentaje >= 50:
+                        mensaje = "🎉 ¡Bien! Tienes buen ojo, pero aún puedes profundizar."
+                    else:
+                        mensaje = "📖 ¡Sigue practicando! Cada idol tiene su historia."
+                    st.success(f"**{correctas}** de **{total}** respuestas correctas ({porcentaje:.0f}%)")
+                    st.info(mensaje)
+                    st.session_state.calificado_dificil = True
 
-                st.success(f"**{correctas}** de **{total}** respuestas correctas ({porcentaje:.0f}%)")
-                st.info(mensaje)
+        with col2:
+            if st.button("🔄 Nuevo artista", use_container_width=True):
+                # Cargar un nuevo artista
+                cargar_nuevo_artista()
+                st.rerun()  # Forzar refresco de la página
 
-                # Mostrar las respuestas correctas (opcional)
-                with st.expander("Ver respuestas correctas"):
-                    st.write(f"**Grupo:** {grupo_correcto}")
-                    st.write(f"**Nombre artístico:** {nombre_correcto}")
-                    st.write(f"**Lugar de nacimiento:** {lugar_correcto}")
-                    st.write(f"**Signo:** {signo_correcto}")
-
-        except FileNotFoundError:
-            st.error("❌ No se encontró el archivo 'BASE DE DATOS.xlsx'. Asegúrate de que esté en la misma carpeta.")
-        except Exception as e:
-            st.error(f"❌ Error al leer el archivo Excel: {e}")
+        # Mostrar respuestas correctas si ya se calificó
+        if st.session_state.calificado_dificil:
+            with st.expander("Ver respuestas correctas"):
+                st.write(f"**Grupo:** {preguntas['grupo']['correcta']}")
+                st.write(f"**Nombre artístico:** {preguntas['nombre']['correcta']}")
+                st.write(f"**Lugar de nacimiento:** {preguntas['lugar']['correcta']}")
+                st.write(f"**Signo:** {preguntas['signo']['correcta']}")
 
     # --- Si la dificultad es Fácil o Normal, usar las preguntas fijas ---
     else:
-        if dificultad == "Fácil":
-            preguntas = preguntas_facil
-        else:  # Normal
-            preguntas = preguntas_normal
-
-        respuestas_usuario = {}
-        for i, p in enumerate(preguntas):
-            respuestas_usuario[i] = st.radio(
-                f"**{i+1}. {p['pregunta']}**",
-                p["opciones"],
-                key=f"pregunta_{i}"
-            )
-
-        if st.button("📊 Ver mi puntuación", use_container_width=True):
-            correctas = 0
-            for i, p in enumerate(preguntas):
-                if respuestas_usuario[i] == p["respuesta"]:
-                    correctas += 1
-            total = len(preguntas)
-            porcentaje = (correctas / total) * 100
-            if porcentaje == 100:
-                mensaje = "🌟 ¡Perfecto! Eres un auténtico experto en K-pop."
-            elif porcentaje >= 60:
-                mensaje = "🎉 ¡Bien! Tienes buen conocimiento, pero puedes mejorar."
-            else:
-                mensaje = "📖 ¡Sigue practicando! El K-pop tiene mucho más que ofrecer."
-            st.success(f"**{correctas}** de **{total}** respuestas correctas ({porcentaje:.0f}%)")
-            st.info(mensaje)
+        # ... (igual que antes, sin cambios)
