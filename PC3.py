@@ -222,12 +222,9 @@ elif opciones == 'Que tanto sabes de los chinos?':
     st.markdown("<h1 style='text-align: center;'>Nombre a la sección de experiencia 💻</h1>", unsafe_allow_html=True)
 
     # Agregar un  texto para la respuesta
-    texto_2 = """
-    Aquí escribe tu experiencia aprendiendo a programar. 
-    ¿Cómo te sentiste al principio?, 
-    ¿Qué te ha enseñado la programación?, 
-    ¿Qué te gusta de programar?, 
-    ¿Qué te gustaría hacer con la programación en el futuro?
-    ¿Cómo se relaciona lo que haz aprendido con tu carrera?
+    texto_4 = """
+    Hola preciosa calabazita de algodon, en este quiz se te hara una prueba psicometrica 
+    para saber que tan fan eres de los hermosos chicos ojos razgados que cantan como los mismos angeles
     """
+    st.markdown(f"<div style='text-align: justify; font-size: 18px;'>{texto_4}</div>", unsafe_allow_html=True)
 
