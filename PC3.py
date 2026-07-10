@@ -231,6 +231,7 @@ elif opciones == 'Que tanto sabes de los chinos?':
     Hola preciosa calabazita de algodon, en este quiz se te hara una prueba psicometrica 
     para saber que tan fan eres de los hermosos chicos ojos razgados que cantan como los mismos angeles
     """
+     col1.image("Amongus2.png", caption='Ellie', width=300)
     st.markdown(f"<div style='text-align: justify; font-size: 18px;'>{texto_4}</div>", unsafe_allow_html=True)
         # --- SELECCIONAR DIFICULTAD ---
     dificultad = st.radio(
